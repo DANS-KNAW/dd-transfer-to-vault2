@@ -1,0 +1,101 @@
+#
+# dd-transfer-to-vault configuration file
+#
+server:
+  applicationContextPath: /
+  adminContextPath: /
+  applicationConnectors:
+    - type: http
+      port: 20350
+  adminConnectors:
+    - type: http
+      port: 20351
+  # Logs the requests to the Jetty http server
+  requestLog:
+    appenders:
+      - type: file
+        archive: false
+        timeZone: system
+        currentLogFilename: /var/opt/dans.knaw.nl/log/dd-transfer-to-vault/request.log
+
+transfer:
+  inbox: /var/opt/dans.knaw.nl/transfer/inbox
+
+
+
+
+
+nbnRegistration:
+  catalogBaseUrl: https://catalog.vault.datastations.nl/dataset
+  registrationInterval: 1000
+  gmh:
+    url: # Fill in a valid GMH server URL
+    token: # Fill in a valid token, generated via the token endpoint of the GMH server
+    httpClient:
+      timeout: 30s
+      connectionTimeout: 15s
+      timeToLive: 1h
+      retries: 2
+      # The GMH server does not handle GZIP compression
+      gzipEnabled: false
+      userAgent: dd-transfer-to-vault
+
+vaultCatalog:
+  url: http://localhost:20305
+  httpClient:
+    timeout: 10s
+    connectionTimeout: 1min
+    # disable chunked encoding because it breaks the multipart/form-data headers:
+    chunkedEncodingEnabled: false
+    timeToLive: 1h
+    cookiesEnabled: false
+    maxConnections: 128
+    maxConnectionsPerRoute: 128
+    keepAlive: 0ms
+    retries: 0
+    userAgent: dd-transfer-to-vault
+
+dataVault:
+  url: http://localhost:20365
+  httpClient:
+    timeout: 10s
+    connectionTimeout: 1min
+    # disable chunked encoding because it breaks the multipart/form-data headers:
+    chunkedEncodingEnabled: false
+    timeToLive: 1h
+    cookiesEnabled: false
+    maxConnections: 128
+    maxConnectionsPerRoute: 128
+    keepAlive: 0ms
+    retries: 0
+    userAgent: dd-transfer-to-vault
+
+
+database:
+  driverClass: org.postgresql.Driver
+  url: jdbc:postgresql://localhost:5432/dd_transfer_to_vault
+  user: changeme
+  password: changeme
+  logValidationErrors: true
+  properties:
+    hibernate.dialect: 'org.hibernate.dialect.PostgreSQL95Dialect'
+    hibernate.hbm2ddl.auto: update
+
+
+
+
+#
+# See https://www.dropwizard.io/en/latest/manual/configuration.html#logging
+#
+logging:
+  level: INFO
+  appenders:
+    - type: file
+      archive: false
+      timeZone: system
+      currentLogFilename: /var/opt/dans.knaw.nl/log/dd-transfer-to-vault/dd-transfer-to-vault.log
+    - type: console
+      # Used in combination with journald, which already adds the timestamp
+      logFormat: "%-5p %c{0}: %m%n%dwREx"
+  loggers:
+    'org.hibernate.engine.internal.StatisticalLoggingSessionEventListener': 'OFF'
