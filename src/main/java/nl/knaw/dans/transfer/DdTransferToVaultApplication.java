@@ -19,6 +19,7 @@ package nl.knaw.dans.transfer;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
+import nl.knaw.dans.transfer.config.DdTransferToVaultConfiguration;
 
 public class DdTransferToVaultApplication extends Application<DdTransferToVaultConfiguration> {
 

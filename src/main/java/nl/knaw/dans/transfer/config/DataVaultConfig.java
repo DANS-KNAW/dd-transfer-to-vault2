@@ -13,14 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package nl.knaw.dans.transfer.config;
 
-package nl.knaw.dans.transfer;
+import io.dropwizard.client.JerseyClientConfiguration;
+import lombok.Data;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.dropwizard.core.Configuration;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.net.URI;
 
-import javax.validation.constraints.NotEmpty;
+@Data
+public class DataVaultConfig {
+    @NotNull
+    private URI url;
 
-public class DdTransferToVaultConfiguration extends Configuration {
-
+    @Valid
+    @NotNull
+    private JerseyClientConfiguration httpClient = new JerseyClientConfiguration();
 }

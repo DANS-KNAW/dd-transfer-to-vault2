@@ -19,11 +19,32 @@ server:
         currentLogFilename: /var/opt/dans.knaw.nl/log/dd-transfer-to-vault/request.log
 
 transfer:
-  inbox: /var/opt/dans.knaw.nl/transfer/inbox
-
-
-
-
+  # Inbox for incoming DVEs
+  inbox:
+    path: /var/opt/dans.knaw.nl/tmp/transfer-inboxes/INSTANCE
+    pollingInterval: 500ms
+  extractMetadata:
+    inbox:
+      path: /var/opt/dans.knaw.nl/dd-transfer-to-vault/INSTANCE/metadata-extraction
+      pollingInterval: 500ms
+    taskQueue:
+      nameFormat: "extract-metadata-worker-%d"
+      maxQueueSize: 5000
+      # Number of threads will be increased when maxQueueSize is exceeded.
+      minThreads: 1
+      # No more than maxThreads will be created though
+      maxThreads: 3
+      # Threads will die after 60 seconds of idleness
+      keepAliveTime: 60 seconds
+  sendToVault:
+    inbox:
+      path: /var/opt/dans.knaw.nl/tmp/transfer-inboxes/INSTANCE/send-to-vault
+      pollingInterval: 500ms
+    dataVault:
+      # Create import batches under this directory
+      batchRoot: /var/opt/dans.knaw.nl/tmp/dd-data-vault/INSTANCE/inbox
+      # If the batch size exceeds this threshold, issue the import request and start a new batch
+      threshold: 100MB
 
 nbnRegistration:
   catalogBaseUrl: https://catalog.vault.datastations.nl/dataset
@@ -41,7 +62,7 @@ nbnRegistration:
       userAgent: dd-transfer-to-vault
 
 vaultCatalog:
-  url: http://localhost:20305
+  url: http://dev.transfer.dans-data.nl:20305
   httpClient:
     timeout: 10s
     connectionTimeout: 1min
@@ -70,7 +91,6 @@ dataVault:
     retries: 0
     userAgent: dd-transfer-to-vault
 
-
 database:
   driverClass: org.postgresql.Driver
   url: jdbc:postgresql://localhost:5432/dd_transfer_to_vault
@@ -80,9 +100,6 @@ database:
   properties:
     hibernate.dialect: 'org.hibernate.dialect.PostgreSQL95Dialect'
     hibernate.hbm2ddl.auto: update
-
-
-
 
 #
 # See https://www.dropwizard.io/en/latest/manual/configuration.html#logging
