@@ -29,6 +29,11 @@ nav:
   - Context:
       - ⇒ DANS Data Station Architecture: arch.md
 
+extra:
+  nbn_url: https://www.kb.nl/en/about-us/services/nbn-agency-nl
+  data_station_architecture_overview: https://dans-knaw.github.io/dans-datastation-architecture/datastation/
+  data_vault_storage_root: https://dans-knaw.github.io/dans-datastation-architecture/data-vault-storage-root/
+
 plugins:
   - markdownextradata
   - search
