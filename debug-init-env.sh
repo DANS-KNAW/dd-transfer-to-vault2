@@ -17,10 +17,10 @@
 
 echo -n "Pre-creating log..."
 TEMPDIR=data
-TRANSFER_INBOX=$TEMPDIR/inbox
-EXTRACT_METADATA_INBOX=$TEMPDIR/extract-metadata/inbox
-SEND_TO_VAULT_INBOX=$TEMPDIR/send-to-vault/inbox
-DATA_VAULT_INBOX=$TEMPDIR/data-vault/inbox
+TRANSFER_INBOX=$TEMPDIR/01_transfer-inbox
+EXTRACT_METADATA_INBOX=$TEMPDIR/02_extract-metadata/inbox
+SEND_TO_VAULT_INBOX=$TEMPDIR/03_send-to-vault/inbox
+DATA_VAULT_INBOX=$TEMPDIR/04_data-vault/inbox
 touch $TEMPDIR/dd-transfer-to-vault.log
 echo "OK"
 echo -n "Creating working directories..."

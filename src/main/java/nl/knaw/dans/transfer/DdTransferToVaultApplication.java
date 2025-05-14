@@ -19,7 +19,10 @@ package nl.knaw.dans.transfer;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
+import nl.knaw.dans.lib.util.inbox.Inbox;
 import nl.knaw.dans.transfer.config.DdTransferToVaultConfiguration;
+import nl.knaw.dans.transfer.core.CollectDveTaskFactory;
+import nl.knaw.dans.transfer.core.TransferInbox;
 
 public class DdTransferToVaultApplication extends Application<DdTransferToVaultConfiguration> {
 
@@ -39,6 +42,15 @@ public class DdTransferToVaultApplication extends Application<DdTransferToVaultC
 
     @Override
     public void run(final DdTransferToVaultConfiguration configuration, final Environment environment) {
+        environment.lifecycle().manage(new TransferInbox(
+            Inbox.builder()
+                .taskFactory(new CollectDveTaskFactory(
+                    configuration.getTransfer().getExtractMetadata().getInbox().getPath(),
+                    configuration.getTransfer().getExtractMetadata().getInbox().getPath().resolve("failed")))
+                .inbox(configuration.getTransfer().getInbox().getPath())
+                .interval(Math.toIntExact(configuration.getTransfer().getInbox().getPollingInterval().toMilliseconds()))
+                .inboxItemComparator(CreationTimeComparator.getInstance())
+                .build()));
 
     }
 

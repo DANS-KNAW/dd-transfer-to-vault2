@@ -21,11 +21,11 @@ server:
 transfer:
   # Inbox for incoming DVEs
   inbox:
-    path: data/inbox
+    path: data/01_transfer-inbox
     pollingInterval: 500ms
   extractMetadata:
     inbox:
-      path: data/extract-metadata/inbox
+      path: data/02_extract-metadata/inbox
       pollingInterval: 500ms
     taskQueue:
       nameFormat: "extract-metadata-worker-%d"
@@ -38,11 +38,11 @@ transfer:
       keepAliveTime: 60 seconds
   sendToVault:
     inbox:
-      path: data/send-to-vault/inbox
+      path: data/03_send-to-vault/inbox
       pollingInterval: 500ms
     dataVault:
       # Create import batches under this directory
-      batchRoot: data/data-vault/inbox
+      batchRoot: data/04_data-vault/inbox
       # If the batch size exceeds this threshold, issue the import request and start a new batch
       threshold: 100MB
 
