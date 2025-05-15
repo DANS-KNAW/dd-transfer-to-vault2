@@ -22,6 +22,7 @@ import io.dropwizard.core.setup.Environment;
 import nl.knaw.dans.lib.util.inbox.Inbox;
 import nl.knaw.dans.transfer.config.DdTransferToVaultConfiguration;
 import nl.knaw.dans.transfer.core.CollectDveTaskFactory;
+import nl.knaw.dans.transfer.core.RemoveEmptySubdirsTask;
 import nl.knaw.dans.transfer.core.TransferInbox;
 
 public class DdTransferToVaultApplication extends Application<DdTransferToVaultConfiguration> {
@@ -44,6 +45,7 @@ public class DdTransferToVaultApplication extends Application<DdTransferToVaultC
     public void run(final DdTransferToVaultConfiguration configuration, final Environment environment) {
         environment.lifecycle().manage(new TransferInbox(
             Inbox.builder()
+                .onPollingHandler(new RemoveEmptySubdirsTask(configuration.getTransfer().getExtractMetadata().getInbox().getPath(), "failed"))
                 .taskFactory(new CollectDveTaskFactory(
                     configuration.getTransfer().getExtractMetadata().getInbox().getPath(),
                     configuration.getTransfer().getExtractMetadata().getInbox().getPath().resolve("failed")))

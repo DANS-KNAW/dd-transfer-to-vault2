@@ -22,20 +22,5 @@ import java.nio.file.Files;
 
 public class CollectDveTaskTest extends TestDirFixture {
 
-    @Test
-    public void shouldRejectNonZipFile() throws Exception {
-        // given
-        var destinationRoot = testDir.resolve("destination");
-        var inbox = testDir.resolve("inbox");
-        var failedOutbox = testDir.resolve("failed-outbox");
-        var path = inbox.resolve("test.txt");
-        Files.createFile(path);
-
-        // when
-        var task = new CollectDveTask(path, destinationRoot, failedOutbox);
-
-        // then
-
-    }
 
 }

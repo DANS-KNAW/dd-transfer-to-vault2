@@ -23,11 +23,6 @@ import java.util.Optional;
 
 /**
  * <p>
- * Collects one DVE from the transfer inbox and hands it over to next step. Each DVE has a target dataset, identified by an NBN. DVEs for the same NBN must be processed in the order that they arrive
- * in the inbox. To ensure this, the CollectDveTask places all DVEs for the same NBN in a subdirectory of the destination root, named after the NBN. The CollectDveTask is responsible for creating this
- * subdirectory. It is also responsible for deleting it once it is empty (i.e. all DVEs for that NBN have been processed), thus signaling to worker for this subdirectory that it can stop. Only if
- * there is a subdirectory for the NBN that is not yet empty, CollectDveTask will add the DVE to that subdirectory. If the subdirectory is empty, it will be deleted and a new one will be created with
- * a new name, which will trigger the consumer to assign it to a new worker.
  * </p>
  * <p>
  * The CollectDveTask only requires the DVE:
@@ -46,14 +41,6 @@ public class CollectDveTask implements Runnable {
 
     @Override
     public void run() {
-        log.info("[{}] Start collecting DVE", dve.getFileName());
-        var nbn = findTargetNbn();
-        if(findSubdirFor(nbn).isPresent()) {
-
-        }
-
-
-
 
         // If there is, but it is empty, delete it and create a new one (with a new name)
 
