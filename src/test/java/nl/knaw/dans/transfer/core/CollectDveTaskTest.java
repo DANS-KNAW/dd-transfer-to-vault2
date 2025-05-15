@@ -19,8 +19,29 @@ import nl.knaw.dans.transfer.TestDirFixture;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CollectDveTaskTest extends TestDirFixture {
 
+    @Test
+    public void should_move_dve_to_target_dir() throws Exception {
+        // Given
+        var inbox = testDir.resolve("inbox");
+        Files.createDirectories(inbox);
+        var dest = testDir.resolve("dest");
+        Files.createDirectories(dest);
 
+        var dve = inbox.resolve("dve.zip");
+        Files.copy(Path.of("src/test/resources/test-dves/doi-10-5072-dar-zzjh97v1.1.zip"), dve);
+
+        var collectDveTask = new CollectDveTask(dve, inbox.resolve("failed"), dest);
+
+        // When
+        collectDveTask.run();
+
+        // Then
+        assertThat(dest.resolve("urn:nbn:nl:ui:13-307ab602-abfa-44c0-b35b-fd75e97105a4")).isDirectory();
+    }
 }
