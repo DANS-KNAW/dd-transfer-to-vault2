@@ -92,7 +92,7 @@ public class ExtractMetadataTask implements Runnable {
 
     private List<Path> getDves() throws IOException {
         try (var dirStream = Files.list(targetNbnDir)) {
-            return dirStream.filter(Files::isRegularFile)
+            return dirStream.filter(Files::isRegularFile).filter(p -> !p.getFileName().toString().equals("block"))
                 .sorted(CreationTimeComparator.getInstance()).toList();
         }
     }
@@ -109,9 +109,11 @@ public class ExtractMetadataTask implements Runnable {
 
     private void moveToOutbox(Path dve, Path outbox, Exception e) {
         try {
-            Files.move(dve, outbox.resolve(dve.getFileName()));
+            var errorDir = outbox.resolve(targetNbnDir.getFileName());
+            Files.createDirectories(errorDir);
+            Files.move(dve, errorDir.resolve(dve.getFileName()));
             if (e != null) {
-                var stackTraceFile = outbox.resolve(dve.getFileName() + "-error.log");
+                var stackTraceFile = errorDir.resolve(dve.getFileName() + "-error.log");
                 try (var writer = Files.newBufferedWriter(stackTraceFile)) {
                     e.printStackTrace(new java.io.PrintWriter(writer));
                 }

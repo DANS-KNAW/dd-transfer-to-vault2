@@ -16,7 +16,6 @@
 package nl.knaw.dans.transfer.core;
 
 import lombok.AllArgsConstructor;
-
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -45,6 +44,7 @@ public class DataFileAttributesReader {
             var pathToSizeMap = readPathToSizeMapping(datasetVersionExport);
 
             return pathToPidMap.entrySet().stream()
+                .filter(e -> pathToSha1Map.containsKey(e.getKey()))
                 .map(entry -> {
                     var path = entry.getKey();
                     var pid = entry.getValue();
