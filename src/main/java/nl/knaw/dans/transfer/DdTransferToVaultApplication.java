@@ -45,14 +45,14 @@ public class DdTransferToVaultApplication extends Application<DdTransferToVaultC
     public void run(final DdTransferToVaultConfiguration configuration, final Environment environment) {
         environment.lifecycle().manage(
             Inbox.builder()
-                .onPollingHandler(new RemoveEmptySubdirsTask(configuration.getTransfer().getExtractMetadata().getInbox().getPath(), "failed"))
+                .onPollingHandler(new RemoveEmptySubdirsTask(configuration.getTransfer().getCollectDve().getOutbox().getProcessed()))
                 .taskFactory(new CollectDveTaskFactory(
-                    configuration.getTransfer().getExtractMetadata().getInbox().getPath(),
-                    configuration.getTransfer().getExtractMetadata().getInbox().getPath().resolve("failed")))
-                .inbox(configuration.getTransfer().getInbox().getPath())
+                    configuration.getTransfer().getCollectDve().getOutbox().getProcessed(),
+                    configuration.getTransfer().getCollectDve().getOutbox().getFailed()))
+                .inbox(configuration.getTransfer().getCollectDve().getInbox().getPath())
                 // N.B. this MUST be a single-threaded executor to prevent DVEs from out-racing each other via parallel processing, which would mess up the order of the DVEs.
                 .executorService(environment.lifecycle().executorService("transfer-inbox").maxThreads(1).minThreads(1).build())
-                .interval(Math.toIntExact(configuration.getTransfer().getInbox().getPollingInterval().toMilliseconds()))
+                .interval(Math.toIntExact(configuration.getTransfer().getCollectDve().getInbox().getPollingInterval().toMilliseconds()))
                 .inboxItemComparator(CreationTimeComparator.getInstance())
                 .build());
 

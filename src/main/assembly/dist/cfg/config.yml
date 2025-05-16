@@ -19,13 +19,15 @@ server:
         currentLogFilename: /var/opt/dans.knaw.nl/log/dd-transfer-to-vault/request.log
 
 transfer:
-  # Inbox for incoming DVEs
-  inbox:
-    path: /var/opt/dans.knaw.nl/tmp/transfer-inboxes/INSTANCE/inbox
-    pollingInterval: 500ms
-  outbox:
-    processed: /var/opt/dans.knaw.nl/dd-transfer-to-vault/INSTANCE/metadata-extraction/inbox
-    failed: /var/opt/dans.knaw.nl/tmp/transfer-inboxes/INSTANCE/failed
+  # Collect the DVE from the transfer-inbox and determine its target NBN
+  collectDve:
+    inbox:
+      path: /var/opt/dans.knaw.nl/tmp/transfer-inboxes/INSTANCE/inbox
+      pollingInterval: 500ms
+    outbox:
+      processed: /var/opt/dans.knaw.nl/dd-transfer-to-vault/INSTANCE/metadata-extraction/inbox
+      failed: /var/opt/dans.knaw.nl/tmp/transfer-inboxes/INSTANCE/failed
+  # Extract metadata from the DVE, register the NBN and update the Vault Catalog
   extractMetadata:
     inbox:
       path: /var/opt/dans.knaw.nl/dd-transfer-to-vault/INSTANCE/metadata-extraction/inbox
@@ -46,6 +48,7 @@ transfer:
       maxThreads: 3
       # Threads will die after 60 seconds of idleness
       keepAliveTime: 60 seconds
+  # Unzip the DVE and send it to the Data Vault
   sendToVault:
     inbox:
       path: /var/opt/dans.knaw.nl/tmp/transfer-inboxes/INSTANCE/send-to-vault/inbox

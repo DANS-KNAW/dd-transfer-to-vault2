@@ -21,16 +21,12 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class TransferConfig {
+public class CollectDveConfig {
     @Valid
     @NotNull
-    private CollectDveConfig collectDve;
+    private InboxConfig inbox;
 
     @Valid
     @NotNull
-    private ExtractMetadataConfig extractMetadata;
-
-    @Valid
-    @NotNull
-    private SendToVaultConfig sendToVault;
+    private OutboxConfig outbox;
 }

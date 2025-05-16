@@ -20,12 +20,13 @@ server:
 
 transfer:
   # Inbox for incoming DVEs
-  inbox:
-    path: data/01_transfer-inbox/inbox
-    pollingInterval: 500ms
-  outbox:
-    processed: data/02_extract-metadata/inbox
-    failed: data/01_transfer-inbox/failed
+  collectDve:
+    inbox:
+      path: data/01_transfer-inbox/inbox
+      pollingInterval: 500ms
+    outbox:
+      processed: data/02_extract-metadata/inbox
+      failed: data/01_transfer-inbox/failed
   extractMetadata:
     inbox:
       path: data/02_extract-metadata/inbox
