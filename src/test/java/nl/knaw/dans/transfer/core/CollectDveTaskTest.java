@@ -89,5 +89,27 @@ public class CollectDveTaskTest extends TestDirFixture {
         assertThat(inbox.resolve("failed").resolve("dve.zip-error.log")).content().contains("No metadata file found in DVE");
     }
 
+    @Test
+    public void should_fail_dve_with_oai_ore_but_without_nbn() throws Exception {
+        // Given
+        var inbox = testDir.resolve("inbox");
+        Files.createDirectories(inbox);
+        var dest = testDir.resolve("dest");
+        Files.createDirectories(dest);
+
+        var dve = inbox.resolve("dve.zip");
+        Files.copy(Path.of("src/test/resources/test-dves/doi-10-5072-dar-zzjh97v1.1-no-nbn.zip"), dve);
+
+        var collectDveTask = new CollectDveTask(dve, inbox.resolve("failed"), dest);
+
+        // When
+        collectDveTask.run();
+
+        // Then
+        assertThat(inbox.resolve("failed").resolve("dve.zip")).exists();
+        assertThat(inbox.resolve("failed").resolve("dve.zip-error.log")).exists();
+        assertThat(inbox.resolve("failed").resolve("dve.zip-error.log")).content().contains("No NBN found in DVE");
+    }
+
 
 }

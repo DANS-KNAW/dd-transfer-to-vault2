@@ -16,6 +16,7 @@
 package nl.knaw.dans.transfer.core;
 
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -76,6 +77,10 @@ public class CollectDveTask implements Runnable {
 
                     try (var is = Files.newInputStream(metadataPath)) {
                         return JsonPath.read(is, NBN_PATH);
+                    } catch (PathNotFoundException e) {
+                        throw new IllegalStateException("No NBN found in DVE", e);
+                    } catch (Exception e) {
+                        throw new IllegalStateException("Unable to read NBN from metadata file", e);
                     }
                 }
             }
