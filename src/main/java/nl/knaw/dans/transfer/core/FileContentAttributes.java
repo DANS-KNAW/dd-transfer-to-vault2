@@ -15,22 +15,26 @@
  */
 package nl.knaw.dans.transfer.core;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NonNull;
-import nl.knaw.dans.lib.util.inbox.InboxTaskFactory;
+import lombok.Data;
+import lombok.ToString;
 
-import java.nio.file.Path;
+import java.util.List;
 
+@Data
 @Builder
-public class CollectDveTaskFactory implements InboxTaskFactory {
-    @NonNull
-    private final Path destinationRoot;
-    @NonNull
-    private final Path failedOutbox;
-
-    @Override
-    public Runnable createInboxTask(Path path) {
-        return new CollectDveTask(path, destinationRoot, failedOutbox);
-    }
+public class FileContentAttributes {
+    private String dataversePid;
+    private String dataversePidVersion;
+    private String title;
+    private String bagId;
+    private String nbn;
+    @ToString.Exclude
+    private String metadata;
+    private String otherId;
+    private String otherIdVersion;
+    private String swordToken;
+    private String dataSupplier;
+    private String datastation;
+    private List<DataFileAttributes> dataFileAttributes;
 }

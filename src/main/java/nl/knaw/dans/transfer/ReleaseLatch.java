@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.transfer.core;
+package nl.knaw.dans.transfer;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NonNull;
-import nl.knaw.dans.lib.util.inbox.InboxTaskFactory;
 
-import java.nio.file.Path;
+import java.util.concurrent.CountDownLatch;
 
-@Builder
-public class CollectDveTaskFactory implements InboxTaskFactory {
-    @NonNull
-    private final Path destinationRoot;
-    @NonNull
-    private final Path failedOutbox;
+@AllArgsConstructor
+public class ReleaseLatch implements Runnable {
+    private final CountDownLatch latch;
 
     @Override
-    public Runnable createInboxTask(Path path) {
-        return new CollectDveTask(path, destinationRoot, failedOutbox);
+    public void run() {
+        try {
+            latch.countDown();
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

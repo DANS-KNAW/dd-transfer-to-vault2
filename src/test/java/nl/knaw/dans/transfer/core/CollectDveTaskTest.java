@@ -36,7 +36,7 @@ public class CollectDveTaskTest extends TestDirFixture {
         var dve = inbox.resolve("dve.zip");
         Files.copy(Path.of("src/test/resources/test-dves/doi-10-5072-dar-zzjh97v1.1.zip"), dve);
 
-        var collectDveTask = new CollectDveTask(dve, inbox.resolve("failed"), dest);
+        var collectDveTask = new CollectDveTask(dve, dest, inbox.resolve("failed"));
 
         // When
         collectDveTask.run();
@@ -56,7 +56,7 @@ public class CollectDveTaskTest extends TestDirFixture {
         var nonZipFile = inbox.resolve("nonzip.txt");
         Files.writeString(nonZipFile, "This is not a zip file");
 
-        var collectDveTask = new CollectDveTask(nonZipFile, inbox.resolve("failed"), dest);
+        var collectDveTask = new CollectDveTask(nonZipFile, dest, inbox.resolve("failed"));
 
         // When
         collectDveTask.run();
@@ -78,7 +78,7 @@ public class CollectDveTaskTest extends TestDirFixture {
         var dve = inbox.resolve("dve.zip");
         Files.copy(Path.of("src/test/resources/test-dves/doi-10-5072-dar-zzjh97v1.1-no-oai-ore.zip"), dve);
 
-        var collectDveTask = new CollectDveTask(dve, inbox.resolve("failed"), dest);
+        var collectDveTask = new CollectDveTask(dve, dest, inbox.resolve("failed"));
 
         // When
         collectDveTask.run();
@@ -100,7 +100,7 @@ public class CollectDveTaskTest extends TestDirFixture {
         var dve = inbox.resolve("dve.zip");
         Files.copy(Path.of("src/test/resources/test-dves/doi-10-5072-dar-zzjh97v1.1-no-nbn.zip"), dve);
 
-        var collectDveTask = new CollectDveTask(dve, inbox.resolve("failed"), dest);
+        var collectDveTask = new CollectDveTask(dve, dest, inbox.resolve("failed"));
 
         // When
         collectDveTask.run();

@@ -44,8 +44,8 @@ public class CollectDveTask implements Runnable {
     private static final String NBN_PATH = "$.ore:describes.dansDataVaultMetadata:dansNbn";
 
     private final Path dve;
-    private final Path failedOutbox;
     private final Path destinationRoot;
+    private final Path failedOutbox;
 
     @Override
     public void run() {
