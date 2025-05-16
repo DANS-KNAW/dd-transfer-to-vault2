@@ -15,13 +15,29 @@
  */
 package nl.knaw.dans.transfer.core;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NonNull;
 import nl.knaw.dans.lib.util.inbox.InboxTaskFactory;
+import nl.knaw.dans.transfer.client.VaultCatalogClient;
 
 import java.nio.file.Path;
 
+@Builder
 public class ExtractMetadataTaskFactory implements InboxTaskFactory {
+    @NonNull
+    private final Path outboxProcessed;
+    @NonNull
+    private final Path outboxFailed;
+    @NonNull
+    private final Path outboxRejected;
+    @NonNull
+    private final FileContentAttributesReader fileContentAttributesReader;
+    @NonNull
+    private final VaultCatalogClient vaultCatalogClient;
+
     @Override
-    public Runnable createInboxTask(Path path) {
-        return null;
+    public Runnable createInboxTask(Path targetNbnDir) {
+        return new ExtractMetadataTask(targetNbnDir, outboxProcessed, outboxFailed, outboxRejected, fileContentAttributesReader, vaultCatalogClient);
     }
 }

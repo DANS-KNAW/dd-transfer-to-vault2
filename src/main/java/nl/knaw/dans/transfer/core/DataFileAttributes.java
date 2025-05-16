@@ -15,22 +15,15 @@
  */
 package nl.knaw.dans.transfer.core;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NonNull;
-import nl.knaw.dans.lib.util.inbox.InboxTaskFactory;
+import lombok.Value;
 
+import java.net.URI;
 import java.nio.file.Path;
 
-@Builder
-public class CollectDveTaskFactory implements InboxTaskFactory {
-    @NonNull
-    private final Path destinationRoot;
-    @NonNull
-    private final Path failedOutbox;
-
-    @Override
-    public Runnable createInboxTask(Path path) {
-        return new CollectDveTask(path, destinationRoot, failedOutbox);
-    }
+@Value
+public class DataFileAttributes {
+    Path filepath;
+    URI uri;
+    String sha1Checksum;
+    long size;
 }

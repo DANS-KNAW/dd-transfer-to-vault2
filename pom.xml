@@ -67,6 +67,15 @@
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-forms</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-hibernate</artifactId>
         </dependency>
         <dependency>
@@ -78,6 +87,27 @@
             <artifactId>json-path</artifactId>
             <version>2.9.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>apache-jena-libs</artifactId>
+            <version>5.0.0</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.knaw.dans</groupId>
+            <artifactId>dans-validation-lib</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+        </dependency>
+
+
 
         <!-- Testing -->
         <dependency>
@@ -110,6 +140,133 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration combine.children="override">
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <dependency>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>0.2.0</version>
+                        </dependency>
+                        <!-- other annotation processors -->
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.knaw.dans</groupId>
+                                    <artifactId>dd-vault-catalog-api</artifactId>
+                                    <version>${dd-vault-catalog-api.version}</version>
+                                    <outputDirectory>${project.build.directory}/openapi</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>nl.knaw.dans</groupId>
+                                    <artifactId>dd-data-vault-api</artifactId>
+                                    <version>${dd-data-vault-api.version}</version>
+                                    <outputDirectory>${project.build.directory}/openapi</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>nl.knaw.dans</groupId>
+                                    <artifactId>dd-gmh-api</artifactId>
+                                    <version>${dd-gmh-api.version}</version>
+                                    <outputDirectory>${project.build.directory}/openapi</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>vault-catalog-client</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/openapi/dd-vault-catalog-api.yml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <apiPackage>nl.knaw.dans.vaultcatalog.client.resources</apiPackage>
+                            <modelPackage>nl.knaw.dans.vaultcatalog.client.api</modelPackage>
+                            <invokerPackage>nl.knaw.dans.vaultcatalog.client.invoker</invokerPackage>
+                            <configOptions>
+                                <!-- the client does not appear to need annotations so we can remove them -->
+                                <annotationLibrary>none</annotationLibrary>
+                                <!-- this generates jersey2 client -->
+                                <library>jersey2</library>
+                                <!-- remove this optional dependency as it was not used in the generated code anyway  -->
+                                <!-- see https://github.com/OpenAPITools/jackson-databind-nullable -->
+                                <openApiNullable>false</openApiNullable>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>data-vault-client</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/openapi/dd-data-vault-api.yml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <apiPackage>nl.knaw.dans.datavault.client.resources</apiPackage>
+                            <modelPackage>nl.knaw.dans.datavault.client.api</modelPackage>
+                            <invokerPackage>nl.knaw.dans.datavault.client.invoker</invokerPackage>
+                            <configOptions>
+                                <!-- the client does not appear to need annotations so we can remove them -->
+                                <annotationLibrary>none</annotationLibrary>
+                                <!-- this generates jersey2 client -->
+                                <library>jersey2</library>
+                                <!-- remove this optional dependency as it was not used in the generated code anyway  -->
+                                <!-- see https://github.com/OpenAPITools/jackson-databind-nullable -->
+                                <openApiNullable>false</openApiNullable>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-dd-gmh-client</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/openapi/dd-gmh-api.yml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <configOptions>
+                                <apiPackage>nl.knaw.dans.gmh.client.resources</apiPackage>
+                                <modelPackage>nl.knaw.dans.gmh.client.api</modelPackage>
+                                <invokerPackage>nl.knaw.dans.gmh.client.invoker</invokerPackage>
+                                <annotationLibrary>none</annotationLibrary>--&gt;
+                                <library>jersey2</library>
+                                <openApiNullable>false</openApiNullable>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

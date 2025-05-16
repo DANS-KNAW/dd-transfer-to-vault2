@@ -13,24 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.transfer.core;
+package nl.knaw.dans.transfer.client;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NonNull;
-import nl.knaw.dans.lib.util.inbox.InboxTaskFactory;
+public class FailedNbnRegistrationException extends Exception {
+    public FailedNbnRegistrationException(String message) {
+        super(message);
+    }
 
-import java.nio.file.Path;
-
-@Builder
-public class CollectDveTaskFactory implements InboxTaskFactory {
-    @NonNull
-    private final Path destinationRoot;
-    @NonNull
-    private final Path failedOutbox;
-
-    @Override
-    public Runnable createInboxTask(Path path) {
-        return new CollectDveTask(path, destinationRoot, failedOutbox);
+    public FailedNbnRegistrationException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

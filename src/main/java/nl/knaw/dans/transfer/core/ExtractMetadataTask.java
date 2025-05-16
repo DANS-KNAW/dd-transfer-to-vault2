@@ -16,30 +16,72 @@
 package nl.knaw.dans.transfer.core;
 
 import lombok.AllArgsConstructor;
-import nl.knaw.dans.transfer.CreationTimeComparator;
+import lombok.extern.slf4j.Slf4j;
+import nl.knaw.dans.transfer.client.VaultCatalogClient;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+@Slf4j
 @AllArgsConstructor
 public class ExtractMetadataTask implements Runnable {
     private final Path targetNbnDir;
+    private final Path outboxProcessed;
+    private final Path outboxFailed;
+    private final Path outboxRejected;
+    private final FileContentAttributesReader fileContentAttributesReader;
+    private final VaultCatalogClient vaultCatalogClient;
 
     @Override
     public void run() {
+        log.debug("Started ExtractMetadataTask for {}", targetNbnDir);
+        try {
+            if (isBlocked()) {
+                log.debug("Target directory {} is blocked, skipping", targetNbnDir);
+                return;
+            }
+        }
+        catch (IOException e) {
+            log.error("Unable to check if target directory is blocked. Aborting...", e);
+            return;
+        }
+
         try {
             var dves = getDves();
             while (!dves.isEmpty()) {
                 for (var dve : dves) {
-                    // Process each DVE
+                    try {
+                        var fileContenctAttributes = fileContentAttributesReader.getFileContentAttributes(dve);
+                        vaultCatalogClient.registerOcflObjectVersion(fileContenctAttributes);
+                    }
+                    catch (Exception e) {
+                        log.error("Error processing DVE", e);
+                        moveToOutbox(dve, outboxFailed, e);
+                        try {
+                            blockTarget();
+                        }
+                        catch (IOException ioe) {
+                            log.error("Unable to block target directory", ioe);
+                        }
+                    }
+                    // Get any new DVE files that may have been added while processing
+                    dves = getDves();
                 }
-                // Get any new DVE files that may have been added while processing
-                dves = getDves();
             }
         }
-        catch (IOException e) {
+        catch (Exception e) {
+            log.error("Error processing DVE files", e);
+            try {
+                blockTarget();
+            }
+            catch (IOException ioe) {
+                log.error("Unable to block target directory", ioe);
+            }
+        }
+        finally {
+            log.debug("Finished ExtractMetadataTask for {}", targetNbnDir);
         }
         /*
          * At this point, all DVE files in targetNbnDir have been processed. We are NOT sticking around to wait for more DVEs, as this would prevent our worker thread from taking on other tasks.
@@ -55,4 +97,28 @@ public class ExtractMetadataTask implements Runnable {
         }
     }
 
+    private boolean isBlocked() throws IOException {
+        return Files.exists(targetNbnDir.resolve("block"));
+    }
+
+    private void blockTarget() throws IOException {
+        if (!isBlocked()) {
+            Files.createFile(targetNbnDir.resolve("block"));
+        }
+    }
+
+    private void moveToOutbox(Path dve, Path outbox, Exception e) {
+        try {
+            Files.move(dve, outbox.resolve(dve.getFileName()));
+            if (e != null) {
+                var stackTraceFile = outbox.resolve(dve.getFileName() + "-error.log");
+                try (var writer = Files.newBufferedWriter(stackTraceFile)) {
+                    e.printStackTrace(new java.io.PrintWriter(writer));
+                }
+            }
+        }
+        catch (IOException ioe) {
+            log.error("Unable to move DVE to outbox: {}", outbox, ioe);
+        }
+    }
 }
