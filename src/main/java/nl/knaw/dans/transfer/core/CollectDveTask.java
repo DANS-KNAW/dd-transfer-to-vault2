@@ -24,6 +24,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.ProviderNotFoundException;
 
 /**
  * <p>
@@ -47,63 +48,64 @@ public class CollectDveTask implements Runnable {
 
     @Override
     public void run() {
-        var targetNbn = findTargetNbn();
-        var targetDir = destinationRoot.resolve(targetNbn);
-        ensureExists(targetDir);
-        moveToTargetDir(targetDir);
+        try {
+            var targetNbn = findTargetNbn();
+            var targetDir = destinationRoot.resolve(targetNbn);
+            ensureExists(targetDir);
+            moveToTargetDir(targetDir);
+        }
+        catch (Exception e) {
+            log.error("Unable to process DVE: {}", dve, e);
+            moveToFailedOutbox(e);
+        }
     }
 
-    private String findTargetNbn() {
-        try (FileSystem zipFs = FileSystems.newFileSystem(dve, (ClassLoader) null)) {
-            var rootDir = zipFs.getRootDirectories().iterator().next();
-            try (var topLevelDirStream = Files.list(rootDir)) {
-                var topLevelDir = topLevelDirStream.filter(Files::isDirectory)
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("No top-level directory found in DVE"));
+    private String findTargetNbn() throws IOException {
+        try {
+            try (FileSystem zipFs = FileSystems.newFileSystem(dve, (ClassLoader) null)) {
+                var rootDir = zipFs.getRootDirectories().iterator().next();
+                try (var topLevelDirStream = Files.list(rootDir)) {
+                    var topLevelDir = topLevelDirStream.filter(Files::isDirectory)
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException("No top-level directory found in DVE"));
 
-                var metadataPath = topLevelDir.resolve(METADATA_PATH);
-                if (!Files.exists(metadataPath)) {
-                    throw new IllegalStateException("No metadata file found in DVE");
-                }
+                    var metadataPath = topLevelDir.resolve(METADATA_PATH);
+                    if (!Files.exists(metadataPath)) {
+                        throw new IllegalStateException("No metadata file found in DVE");
+                    }
 
-                try (var is = Files.newInputStream(metadataPath)) {
-                    return JsonPath.read(is, NBN_PATH);
+                    try (var is = Files.newInputStream(metadataPath)) {
+                        return JsonPath.read(is, NBN_PATH);
+                    }
                 }
             }
         }
-        catch (IOException e) {
-            throw new RuntimeException("Error processing ZIP file", e);
+        catch (ProviderNotFoundException e) {
+            throw new RuntimeException("The file system provider is not found. Probably not a ZIP file: " + dve, e);
         }
     }
 
-    private void ensureExists(Path dir) {
+    private void ensureExists(Path dir) throws IOException {
         if (!Files.exists(dir)) {
-            try {
-                Files.createDirectories(dir);
-            }
-            catch (IOException e) {
-                log.error("Unable to create target directory: {}", dir, e);
-                moveToFailedOutbox();
-            }
+            Files.createDirectories(dir);
         }
     }
 
-    private void moveToTargetDir(Path targetDir) {
-        try {
-            Files.move(dve, targetDir.resolve(dve.getFileName()));
-        }
-        catch (IOException e) {
-            log.error("Unable to move DVE to target directory: {}", targetDir, e);
-            moveToFailedOutbox();
-        }
+    private void moveToTargetDir(Path targetDir) throws IOException {
+        Files.move(dve, targetDir.resolve(dve.getFileName()));
     }
 
-    private void moveToFailedOutbox() {
+    private void moveToFailedOutbox(Exception e) {
         try {
+            ensureExists(failedOutbox);
             Files.move(dve, failedOutbox.resolve(dve.getFileName()));
+            var stackTraceFile = failedOutbox.resolve(dve.getFileName() + "-error.log");
+            try (var writer = Files.newBufferedWriter(stackTraceFile)) {
+                e.printStackTrace(new java.io.PrintWriter(writer));
+            }
         }
-        catch (IOException e) {
-            log.error("Unable to move DVE to failed outbox: {}", failedOutbox, e);
+        catch (IOException ioe) {
+            log.error("Unable to move DVE to failed outbox: {}", failedOutbox, ioe);
         }
     }
 }
