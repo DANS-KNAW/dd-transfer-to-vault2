@@ -22,8 +22,8 @@ import io.dropwizard.core.setup.Environment;
 import nl.knaw.dans.lib.util.inbox.Inbox;
 import nl.knaw.dans.transfer.config.DdTransferToVaultConfiguration;
 import nl.knaw.dans.transfer.core.CollectDveTaskFactory;
+import nl.knaw.dans.transfer.core.ExtractMetadataTaskFactory;
 import nl.knaw.dans.transfer.core.RemoveEmptySubdirsTask;
-import nl.knaw.dans.transfer.core.TransferInbox;
 
 public class DdTransferToVaultApplication extends Application<DdTransferToVaultConfiguration> {
 
@@ -43,17 +43,27 @@ public class DdTransferToVaultApplication extends Application<DdTransferToVaultC
 
     @Override
     public void run(final DdTransferToVaultConfiguration configuration, final Environment environment) {
-        environment.lifecycle().manage(new TransferInbox(
+        environment.lifecycle().manage(
             Inbox.builder()
                 .onPollingHandler(new RemoveEmptySubdirsTask(configuration.getTransfer().getExtractMetadata().getInbox().getPath(), "failed"))
                 .taskFactory(new CollectDveTaskFactory(
                     configuration.getTransfer().getExtractMetadata().getInbox().getPath(),
                     configuration.getTransfer().getExtractMetadata().getInbox().getPath().resolve("failed")))
                 .inbox(configuration.getTransfer().getInbox().getPath())
+                // N.B. this MUST be a single-threaded executor to prevent DVEs from out-racing each other via parallel processing, which would mess up the order of the DVEs.
+                .executorService(environment.lifecycle().executorService("transfer-inbox").maxThreads(1).minThreads(1).build())
                 .interval(Math.toIntExact(configuration.getTransfer().getInbox().getPollingInterval().toMilliseconds()))
                 .inboxItemComparator(CreationTimeComparator.getInstance())
-                .build()));
+                .build());
 
+        environment.lifecycle().manage(
+            Inbox.builder()
+                .taskFactory(new ExtractMetadataTaskFactory())
+                .inbox(configuration.getTransfer().getExtractMetadata().getInbox().getPath())
+                .executorService(configuration.getTransfer().getExtractMetadata().getTaskQueue().build(environment))
+                .interval(Math.toIntExact(configuration.getTransfer().getExtractMetadata().getInbox().getPollingInterval().toMilliseconds()))
+                .inboxItemComparator(CreationTimeComparator.getInstance())
+                .build());
     }
 
 }

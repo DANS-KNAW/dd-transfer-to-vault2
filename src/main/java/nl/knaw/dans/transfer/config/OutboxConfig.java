@@ -16,22 +16,11 @@
 package nl.knaw.dans.transfer.config;
 
 import lombok.Data;
-import nl.knaw.dans.lib.util.ExecutorServiceFactory;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import java.nio.file.Path;
 
 @Data
-public class ExtractMetadataConfig {
-    @Valid
-    @NotNull
-    private InboxConfig inbox;
-
-    @Valid
-    @NotNull
-    private OutboxWithRejectedConfig outbox;
-
-    @Valid
-    @NotNull
-    private ExecutorServiceFactory taskQueue;
+public class OutboxConfig {
+    private Path processed;
+    private Path failed;
 }

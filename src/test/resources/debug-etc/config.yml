@@ -21,12 +21,19 @@ server:
 transfer:
   # Inbox for incoming DVEs
   inbox:
-    path: data/01_transfer-inbox
+    path: data/01_transfer-inbox/inbox
     pollingInterval: 500ms
+  outbox:
+    processed: data/02_extract-metadata/inbox
+    failed: data/01_transfer-inbox/failed
   extractMetadata:
     inbox:
       path: data/02_extract-metadata/inbox
       pollingInterval: 500ms
+    outbox:
+      processed: data/03_send-to-vault/inbox
+      failed: data/02_extract-metadata/outbox/failed
+      rejected: data/02_extract-metadata/outbox/rejected
     taskQueue:
       nameFormat: "extract-metadata-worker-%d"
       maxQueueSize: 5000
@@ -40,6 +47,9 @@ transfer:
     inbox:
       path: data/03_send-to-vault/inbox
       pollingInterval: 500ms
+    outbox:
+      processed: data/03_send-to-vault/outbox/processed
+      failed: data/03_send-to-vault/outbox/failed
     dataVault:
       # Create import batches under this directory
       batchRoot: data/04_data-vault/inbox

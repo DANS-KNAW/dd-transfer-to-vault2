@@ -15,22 +15,13 @@
  */
 package nl.knaw.dans.transfer.core;
 
-import io.dropwizard.lifecycle.Managed;
-import lombok.AllArgsConstructor;
-import nl.knaw.dans.lib.util.inbox.Inbox;
+import nl.knaw.dans.lib.util.inbox.InboxTaskFactory;
 
-@AllArgsConstructor
-public class TransferInbox implements Managed {
-    private final Inbox inbox;
+import java.nio.file.Path;
 
+public class ExtractMetadataTaskFactory implements InboxTaskFactory {
     @Override
-    public void start() throws Exception {
-        inbox.start();
-    }
-
-    @Override
-    public void stop() throws Exception {
-        inbox.stop();
+    public Runnable createInboxTask(Path path) {
+        return null;
     }
 }
-

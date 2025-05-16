@@ -28,6 +28,10 @@ public class SendToVaultConfig {
 
     @Valid
     @NotNull
+    private OutboxConfig outbox;
+
+    @Valid
+    @NotNull
     private DataVaultBatchConfig dataVault;
 
 }

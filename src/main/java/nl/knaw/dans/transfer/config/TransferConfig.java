@@ -28,6 +28,10 @@ public class TransferConfig {
 
     @Valid
     @NotNull
+    private OutboxConfig outbox;
+
+    @Valid
+    @NotNull
     private ExtractMetadataConfig extractMetadata;
 
     @Valid
